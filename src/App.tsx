@@ -19,33 +19,9 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Router>
-          <div
-            style={{
-              minHeight: '100vh',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            {/* <Header /> */}
-            <Container
-              component="main"
-              maxWidth="lg"
-              sx={{
-                flex: 1,
-                py: 4,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 3,
-              }}
-            >
-              <Routes>
-                <Route path="/" element={<Home />} />
-                {/* <Route path="/forecast" element={<Forecast />} />
-                  <Route path="*" element={<NotFound />} /> */}
-              </Routes>
-            </Container>
-            {/* <Footer /> */}
-          </div>
+          <Routes>
+            <Route path="/" element={<Home />} />
+          </Routes>
         </Router>
       </ThemeProvider>
     </WeatherProvider>

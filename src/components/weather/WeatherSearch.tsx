@@ -1,5 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { TextField, Button, Box, Autocomplete } from '@mui/material';
+import {
+  TextField,
+  Button,
+  Box,
+  Autocomplete,
+  CircularProgress,
+  InputAdornment,
+} from '@mui/material';
 import { Search } from '@mui/icons-material';
 import { weatherAPI } from '../../services/weatherAPI';
 import { UI_CONSTANTS, WEATHER_API } from '@/utils/constants';
@@ -12,6 +19,7 @@ const WeatherSearch = ({ loading }: WeatherSearchProps) => {
   const [locations, setLocations] = useState<WeatherLocationType[]>([]);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [message, setMessage] = useState<string>('');
+  const [citySearchLoading, setCitySearchLoading] = useState(false);
 
   const { getWeatherData } = useWeatherContext();
 
@@ -23,13 +31,8 @@ const WeatherSearch = ({ loading }: WeatherSearchProps) => {
   const handleSubmit = (cityObject: WeatherLocationType) => {
     // e.preventDefault();
     // TODO: Add validation and call onSearch
-    // fetches weather data, sets global context
+    // fetches current & forecast weather data, & sets global context
     getWeatherData(cityObject.lat, cityObject.lon);
-  };
-
-  const handleGeolocation = () => {
-    // TODO: Implement geolocation feature
-    // Use navigator.geolocation API
   };
 
   const handleWeatherAPIError = (err: WeatherAPIError) => {
@@ -50,6 +53,7 @@ const WeatherSearch = ({ loading }: WeatherSearchProps) => {
   // fetches & returns updated search results on user search keypress
   useEffect(() => {
     const fetchCities = async () => {
+      setCitySearchLoading(true);
       try {
         const data = await weatherAPI.getCurrentCitySearch(searchTerm);
 
@@ -71,6 +75,8 @@ const WeatherSearch = ({ loading }: WeatherSearchProps) => {
           // Handle unexpected errors (network issues, etc.)
           setErrorMessage('An unexpected error occurred');
         }
+      } finally {
+        setCitySearchLoading(false);
       }
     };
     fetchCities();
@@ -78,18 +84,17 @@ const WeatherSearch = ({ loading }: WeatherSearchProps) => {
 
   return (
     <Box
-      // component="form"
-      // onSubmit={handleSubmit}
       sx={{
         display: 'flex',
         gap: 2,
-        flexDirection: { xs: 'column', sm: 'row' },
-        alignItems: 'stretch',
+        alignItems: 'center',
+        maxWidth: 600,
+        margin: '0 auto',
       }}
     >
       <Autocomplete
         freeSolo
-        id="free-solo-2-demo"
+        fullWidth
         disableClearable
         options={locations}
         getOptionLabel={(option: string | WeatherLocationType) => {
@@ -100,15 +105,12 @@ const WeatherSearch = ({ loading }: WeatherSearchProps) => {
             ? `${option.name}, ${option.state}, ${option.country}`
             : `${option.name}, ${option.country}`;
         }}
-        // prevents react non-unique key error
         getOptionKey={(option: string | WeatherLocationType) => {
           if (typeof option === 'string') {
             return option;
           }
-          // keys based on coordinates since they're always unique
           return `${option.lat}-${option.lon}`;
         }}
-        // prevents default mui behevior that filters out options
         filterOptions={(options) => options}
         onInputChange={(e, value) => {
           setSearchTerm(value);
@@ -124,22 +126,38 @@ const WeatherSearch = ({ loading }: WeatherSearchProps) => {
         renderInput={(params) => (
           <TextField
             {...params}
-            label={UI_CONSTANTS.PLACEHOLDERS.SEARCH}
-            slotProps={{
-              input: {
-                ...params.InputProps,
-                type: 'search',
-              },
+            label="Search for a city"
+            variant="outlined"
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {citySearchLoading && (
+                    <InputAdornment position="end">
+                      <CircularProgress size={20} />
+                    </InputAdornment>
+                  )}
+                  {params.InputProps.endAdornment}
+                </>
+              ),
+            }}
+            inputProps={{
+              ...params.inputProps,
+              type: 'search',
             }}
           />
         )}
       />
+
       <Button
         type="submit"
         variant="contained"
         startIcon={<Search />}
         disabled={loading}
-        sx={{ minWidth: 120 }}
+        sx={{
+          minWidth: 120,
+          height: 56, // Match TextField height
+        }}
       >
         {loading ? 'Searching...' : 'Search'}
       </Button>

@@ -2,7 +2,10 @@
 export const WEATHER_API = {
   // API Configuration - Updated URLs
   SUBSCRIPTIONG_BASE_URL: 'https://api.openweathermap.org/data/3.0/onecall?',
+  // https://openweathermap.org/current
   FREE_BASE_URL: 'https://api.openweathermap.org/data/2.5/weather?',
+  // https://openweathermap.org/forecast5
+  FREE_FORECAST_URL: 'https://api.openweathermap.org/data/2.5/forecast?',
   GEO_BASE_URL: 'http://api.openweathermap.org/geo/1.0/direct?',
 
   // Query Parameters
