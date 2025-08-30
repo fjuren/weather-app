@@ -1,97 +1,141 @@
-import React, { createContext, useContext, ReactNode, useState } from 'react';
-import { WeatherContextType } from '../types/weather';
+import React, { createContext, useContext, ReactNode, useReducer } from 'react';
+import {
+  WeatherContextType,
+  WeatherState,
+  WeatherAction,
+} from '../types/weather';
 import { weatherAPI } from '@/services/weatherAPI';
 import { WeatherAPIError } from '@/utils/helpers';
-import { CurrentWeatherFreeResponse } from '@/types/currentWeather';
-import { ForecastWeatherResponse } from '@/types/forecastWeather';
 import { WEATHER_API } from '@/utils/constants';
+
+const appReducer = (
+  state: WeatherState,
+  action: WeatherAction
+): WeatherState => {
+  switch (action.type) {
+    case 'GET_WEATHER_DATA_START':
+      return { ...state, loading: true, error: null };
+
+    case 'GET_WEATHER_DATA_SUCCESS':
+      return {
+        ...state,
+        loading: false,
+        currentWeatherData: action.payload.currentWeather,
+        forecastWeatherData: action.payload.forecastWeather,
+        units: action.payload.units,
+        lastSearchedCity: action.payload.cityName,
+        error: null,
+      };
+
+    case 'GET_WEATHER_DATA_ERROR':
+      return {
+        ...state,
+        loading: false,
+        error: action.payload,
+        currentWeatherData: null,
+        forecastWeatherData: null,
+        lastSearchedCity: '',
+      };
+
+    case 'TOGGLE_UNITS':
+      return { ...state, units: action.payload };
+
+    case 'CLEAR_ERROR':
+      return { ...state, error: null };
+
+    default:
+      return state;
+  }
+};
 
 export const WeatherProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  // const [state, dispatch] = useReducer(weatherReducer, initialState);
-  const [loading, setLoading] = useState(false);
-  const [currentWeatherData, setCurrentWeatherData] =
-    useState<CurrentWeatherFreeResponse | null>(null);
-  const [forecastWeatherData, setForecastWeatherData] =
-    useState<ForecastWeatherResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [units, setUnits] = useState<string>(WEATHER_API.UNITS.METRIC);
-
-  // TODO: Add any additional context methods here
-  // Example: fetchWeather, toggleUnit, clearError, etc.
+  const initialState: WeatherState = {
+    loading: false,
+    error: null,
+    currentWeatherData: null,
+    forecastWeatherData: null,
+    units: WEATHER_API.UNITS.METRIC,
+    lastSearchedCity: '',
+  };
+  const [state, dispatch] = useReducer(appReducer, initialState);
 
   const getWeatherData = async (
     lat: number,
     lon: number,
     selectedUnits?: string
   ) => {
-    const unitsToUse = selectedUnits || units;
-    setLoading(true);
-    setError(null);
+    const unitsToUse = selectedUnits || state.units;
+    dispatch({ type: 'GET_WEATHER_DATA_START' });
 
     try {
-      // both api enpoints called; decided to combine to prevent race condition with loading stae
+      // both api endpoints called; decided to combine to prevent race condition with loading state
       const [currentResponse, forecastResponse] = await Promise.all([
         weatherAPI.getCurrentWeather(lat, lon, unitsToUse),
         weatherAPI.getForecastWeather(lat, lon, unitsToUse),
       ]);
 
-      setCurrentWeatherData(currentResponse);
-      setForecastWeatherData(forecastResponse);
-      setUnits(unitsToUse);
+      dispatch({
+        type: 'GET_WEATHER_DATA_SUCCESS',
+        payload: {
+          currentWeather: currentResponse,
+          forecastWeather: forecastResponse,
+          units: unitsToUse,
+          cityName: currentResponse.name,
+        },
+      });
     } catch (err) {
       // stops response if either api call encounters an issue
       if (err instanceof WeatherAPIError) {
-        setError(err.message);
+        dispatch({ type: 'GET_WEATHER_DATA_ERROR', payload: err.message });
       } else if (err instanceof Error) {
-        setError(err.message);
+        dispatch({ type: 'GET_WEATHER_DATA_ERROR', payload: err.message });
       } else {
-        setError('An unexpected error occurred');
+        dispatch({
+          type: 'GET_WEATHER_DATA_ERROR',
+          payload: 'An unexpected error occurred',
+        });
       }
-
-      // clear data if error
-      setCurrentWeatherData(null);
-      setForecastWeatherData(null);
-    } finally {
-      setLoading(false);
     }
   };
 
   const toggleUnits = async () => {
     const newUnits =
-      units === WEATHER_API.UNITS.METRIC
+      state.units === WEATHER_API.UNITS.METRIC
         ? WEATHER_API.UNITS.IMPERIAL
         : WEATHER_API.UNITS.METRIC;
 
-    // If we have current weather data, re-fetch with new units
-    if (currentWeatherData) {
+    dispatch({ type: 'TOGGLE_UNITS', payload: newUnits });
+
+    // if we have current weather data, re-fetch with new units
+    if (state.currentWeatherData) {
       await getWeatherData(
-        currentWeatherData.coord.lat,
-        currentWeatherData.coord.lon,
+        state.currentWeatherData.coord.lat,
+        state.currentWeatherData.coord.lon,
         newUnits
       );
-    } else {
-      setUnits(newUnits);
     }
+  };
+
+  // remove prior error message
+  const clearError = () => {
+    dispatch({ type: 'CLEAR_ERROR' });
   };
 
   const value = {
     // global state
-    loading,
-    currentWeatherData,
-    forecastWeatherData,
-    error,
-    units,
+    loading: state.loading,
+    currentWeatherData: state.currentWeatherData,
+    forecastWeatherData: state.forecastWeatherData,
+    error: state.error,
+    units: state.units,
+    lastSearchedCity: state.lastSearchedCity,
 
     // global actions
     getWeatherData,
     toggleUnits,
-
-    // TODO
-    // state,
-    // dispatch,
-    // Add your methods here
+    clearError,
   };
 
   return (

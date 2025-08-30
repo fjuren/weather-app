@@ -1,6 +1,30 @@
 import { CurrentWeatherFreeResponse } from './currentWeather';
 import { ForecastWeatherResponse } from './forecastWeather';
 
+export interface WeatherState {
+  loading: boolean;
+  currentWeatherData: CurrentWeatherFreeResponse | null;
+  forecastWeatherData: ForecastWeatherResponse | null;
+  error: string | null;
+  units: string;
+  lastSearchedCity: string;
+}
+
+export type WeatherAction =
+  | { type: 'GET_WEATHER_DATA_START' }
+  | {
+      type: 'GET_WEATHER_DATA_SUCCESS';
+      payload: {
+        currentWeather: CurrentWeatherFreeResponse;
+        forecastWeather: ForecastWeatherResponse;
+        units: string;
+        cityName: string;
+      };
+    }
+  | { type: 'GET_WEATHER_DATA_ERROR'; payload: string }
+  | { type: 'TOGGLE_UNITS'; payload: string }
+  | { type: 'CLEAR_ERROR' };
+
 export interface WeatherContextType {
   // global state
   loading: boolean;
@@ -8,6 +32,7 @@ export interface WeatherContextType {
   forecastWeatherData: ForecastWeatherResponse | null;
   error: string | null;
   units: string;
+  lastSearchedCity: string;
 
   // global actions
   getWeatherData: (
@@ -16,9 +41,7 @@ export interface WeatherContextType {
     selectedUnits?: string
   ) => Promise<void>;
   toggleUnits: () => Promise<void>;
-  // state: WeatherState;
-  // dispatch: React.Dispatch<any>; // Replace 'any' with proper action type
-  // Add helper functions if needed
+  clearError: () => void;
 }
 
 export interface WeatherSearchProps {
@@ -34,6 +57,14 @@ export interface WeatherLocationType {
   local_names?: Record<string, string>;
 }
 
+export interface WeatherState {
+  loading: boolean;
+  error: string | null;
+  currentWeatherData: CurrentWeatherFreeResponse | null;
+  forecastWeatherData: ForecastWeatherResponse | null;
+  units: string;
+  lastSearchedCity: string;
+}
 // export interface CurrentWeatherSubscriptionResponse {
 //   lat: number;
 //   lon: number;
@@ -149,11 +180,6 @@ export interface WeatherLocationType {
 //   description: string;
 //   tags: string[];
 // }
-
-export interface WeatherState {
-  // Add state shape for useReducer/Redux
-  // Hint: current weather, forecast, loading, error states
-}
 
 // Add more interfaces as needed
 export type TemperatureUnit = 'celsius' | 'fahrenheit';

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React from 'react';
 import {
   Paper,
   Typography,
@@ -7,7 +7,6 @@ import {
   CardContent,
   Avatar,
   Chip,
-  LinearProgress,
   Container,
   CircularProgress,
   ToggleButton,
@@ -17,7 +16,7 @@ import Grid from '@mui/material/Grid';
 import WeatherSearch from '../components/weather/WeatherSearch';
 import { useWeatherContext } from '@/context/WeatherContext';
 import { Air, Opacity, Speed, Visibility } from '@mui/icons-material';
-import { WeatherMetrics } from '@/components/WeatherMetrics';
+import { WeatherMetrics } from '@/components/weather/WeatherMetrics';
 import { ForecastWeatherItem } from '@/types/forecastWeather';
 // import WeatherDisplay from '../components/Weather/WeatherDisplay';
 // import TemperatureToggle from '../components/Weather/TemperatureToggle';
@@ -29,7 +28,6 @@ const Home: React.FC = () => {
     loading,
     currentWeatherData,
     forecastWeatherData,
-    error,
     units,
     toggleUnits,
   } = useWeatherContext();
