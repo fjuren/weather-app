@@ -6,7 +6,7 @@ export const WEATHER_API = {
   FREE_BASE_URL: 'https://api.openweathermap.org/data/2.5/weather?',
   // https://openweathermap.org/forecast5
   FREE_FORECAST_URL: 'https://api.openweathermap.org/data/2.5/forecast?',
-  GEO_BASE_URL: 'http://api.openweathermap.org/geo/1.0/direct?',
+  GEO_BASE_URL: 'https://api.openweathermap.org/geo/1.0/direct?',
 
   // Query Parameters
   API_QUERY_MIN: 4,
