@@ -18,12 +18,16 @@ import { useWeatherContext } from '@/context/WeatherContext';
 import { Air, Opacity, Speed, Visibility } from '@mui/icons-material';
 import { WeatherMetrics } from '@/components/weather/WeatherMetrics';
 import { ForecastWeatherItem } from '@/types/forecastWeather';
-// import WeatherDisplay from '../components/Weather/WeatherDisplay';
-// import TemperatureToggle from '../components/Weather/TemperatureToggle';
+import {
+  formatDate,
+  formatTime,
+  getDailyForecast,
+  getHourlyForecast,
+  getWeatherGradient,
+  getWindDirection,
+} from '@/utils/helpers';
 
 const Home: React.FC = () => {
-  // const { state, dispatch } = useWeather();
-
   const {
     loading,
     currentWeatherData,
@@ -31,87 +35,6 @@ const Home: React.FC = () => {
     units,
     toggleUnits,
   } = useWeatherContext();
-
-  const getWeatherGradient = (main: string) => {
-    const gradients: Record<string, string> = {
-      Clear: 'linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)',
-      Clouds: 'linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%)',
-      Rain: 'linear-gradient(135deg, #81ecec 0%, #00b894 100%)',
-      Snow: 'linear-gradient(135deg, #ddd6fe 0%, #8b5cf6 100%)',
-      Thunderstorm: 'linear-gradient(135deg, #636e72 0%, #2d3436 100%)',
-      default: 'linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)',
-    };
-    return gradients[main] || gradients.default;
-  };
-
-  const getWindDirection = (degrees: number) => {
-    const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-    return directions[Math.round(degrees / 45) % 8];
-  };
-
-  const formatDate = (timestamp: number) => {
-    return new Date(timestamp * 1000).toLocaleDateString([], {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
-  // Helper function to format time for display
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      hour12: true,
-    });
-  };
-
-  const getHourlyForecast = (
-    forecastWeatherData: ForecastWeatherItem[],
-    cityTimezone: number
-  ) => {
-    // Take first 8 items (24 hours with 3-hour intervals)
-    return forecastWeatherData.slice(0, 8).map((item) => {
-      const localTimestamp = (item.dt + cityTimezone) * 1000;
-      return {
-        dt: item.dt,
-        time: new Date(localTimestamp),
-        temp: item.main.temp,
-        weather: item.weather[0],
-        humidity: item.main.humidity,
-        windSpeed: item.wind.speed,
-        pop: item.pop, // Probability of precipitation
-      };
-    });
-  };
-
-  const getDailyForecast = (forecastWeatherData: ForecastWeatherItem[]) => {
-    const grouped: Record<string, any> = {};
-    forecastWeatherData.forEach((item) => {
-      const date = new Date(item.dt * 1000).toDateString();
-      if (!grouped[date]) {
-        grouped[date] = [];
-      }
-      grouped[date].push(item);
-    });
-
-    return Object.entries(grouped)
-      .slice(0, 5)
-      .map(([date, items]) => {
-        const temps = items.map((item: any) => item.main.temp);
-        const maxTemp = Math.max(...temps);
-        const minTemp = Math.min(...temps);
-        const mainWeather =
-          items.find((item: any) => item.sys.pod === 'd') || items[0];
-
-        return {
-          date,
-          maxTemp,
-          minTemp,
-          weather: mainWeather.weather[0],
-          items,
-        };
-      });
-  };
 
   return (
     <Box
@@ -198,7 +121,7 @@ const Home: React.FC = () => {
                 backdropFilter: 'blur(10px)',
               }}
             >
-              <WeatherSearch loading={loading} />
+              <WeatherSearch />
             </Paper>
           </Box>
         </Box>
@@ -395,7 +318,7 @@ const Home: React.FC = () => {
                       fontSize: { xs: '1.5rem', md: '2.125rem' },
                     }}
                   >
-                    3 hour Forecast
+                    3 hour Forecast (local times)
                   </Typography>
                   {/* hourly forecast section */}
                   <Grid container spacing={2} justifyContent="center">

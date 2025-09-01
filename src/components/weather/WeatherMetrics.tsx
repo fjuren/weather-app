@@ -1,5 +1,3 @@
-import { CurrentWeatherFreeResponse } from '@/types/currentWeather';
-import { Opacity } from '@mui/icons-material';
 import {
   Card,
   CardContent,

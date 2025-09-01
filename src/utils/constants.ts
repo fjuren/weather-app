@@ -19,31 +19,28 @@ export const WEATHER_API = {
     IMPERIAL: 'imperial', // Fahrenheit, mph, inches
     STANDARD: 'standard', // Kelvin, m/s, mm
   },
-
-  // Error Messages
-  ERRORS: {
-    NETWORK_ERROR: 'Network error occurred while fetching weather data',
-    INVALID_LOCATION: 'Invalid location provided',
-    GEOLOCATION_ERROR: 'Unable to retrieve your location',
-  },
-} as const;
-
-// Search Configuration
-export const SEARCH_CONFIG = {
-  DEBOUNCE_DELAY: 300, // ms
-  MIN_SEARCH_LENGTH: 2,
-  MAX_RESULTS_DISPLAY: 8,
-  AUTO_SELECT_THRESHOLD: 1, // Auto-select if only 1 exact match
 } as const;
 
 // UI Constants
 export const UI_CONSTANTS = {
-  LOADING_MESSAGES: {
-    SEARCHING: 'Searching...',
-    LOADING_WEATHER: 'Loading weather data...',
-    GETTING_LOCATION: 'Getting your location...',
+  SEARCH_MESSAGES: {
+    TYPING: 'Keep typing...',
+    NO_RESULTS: 'No cities found... keep searching',
   },
-  PLACEHOLDERS: {
-    SEARCH: 'Enter city name (e.g., Vancouver, London, New York)...',
+
+  // Error Messages
+  ERRORS: {
+    NETWORK_ERROR: 'Network error occurred while fetching weather data',
+    NOT_FOUND: 'Weather service not found. Please try again later.',
+    UNAUTHORIZED: 'API key issue. Please contact support.',
+    INVALID_RESPONSE:
+      'Sorry there is an issue with the service. Please try again later.',
+    UNKNOWN_ERROR: 'Something went wrong. Please try again later.',
+  },
+
+  // General text found on forms
+  FORM_TEXT: {
+    SEARCH_LABEL: 'Search for a city',
+    SEARCH_PLACEHOLDER: 'Start typing',
   },
 } as const;

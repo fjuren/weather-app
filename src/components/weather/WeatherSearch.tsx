@@ -1,29 +1,26 @@
-import React, { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   TextField,
-  Button,
   Box,
   Autocomplete,
   CircularProgress,
   InputAdornment,
   Typography,
 } from '@mui/material';
-import { Search } from '@mui/icons-material';
 import { weatherAPI } from '../../services/weatherAPI';
 import { UI_CONSTANTS, WEATHER_API } from '@/utils/constants';
 import { WeatherAPIError } from '@/utils/helpers';
-import { WeatherSearchProps, WeatherLocationType } from '@/types/weather';
-import { useWeatherContext, WeatherContext } from '@/context/WeatherContext';
+import { WeatherLocationType } from '@/types/weather';
+import { useWeatherContext } from '@/context/WeatherContext';
 
-const WeatherSearch = ({ loading }: WeatherSearchProps) => {
+const WeatherSearch = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [locations, setLocations] = useState<WeatherLocationType[]>([]);
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [message, setMessage] = useState<string>('');
   const [citySearchLoading, setCitySearchLoading] = useState(false);
 
-  const { lastSearchedCity, clearError, getWeatherData, error } =
-    useWeatherContext();
+  const { clearError, getWeatherData, error } = useWeatherContext();
 
   //   Submit is for intended form submission. From onChange MUI component
   const handleSubmit = (cityObject: WeatherLocationType) => {
@@ -39,15 +36,15 @@ const WeatherSearch = ({ loading }: WeatherSearchProps) => {
   const handleWeatherAPIError = (err: WeatherAPIError) => {
     switch (err.code) {
       case '404':
-        return 'Weather service not found. Please try again later.';
+        return UI_CONSTANTS.ERRORS.NOT_FOUND;
       case '401':
-        return 'API key issue. Please contact support.';
+        return UI_CONSTANTS.ERRORS.UNAUTHORIZED;
       case 'INVALID_RESPONSE':
-        return 'Sorry there is an issue with the service. Please try again later.';
+        return UI_CONSTANTS.ERRORS.INVALID_RESPONSE;
       case 'NETWORK_ERROR':
-        return 'Network error. Please try again later.';
+        return UI_CONSTANTS.ERRORS.NETWORK_ERROR;
       default:
-        return 'Something went wrong. Please try again later.';
+        return UI_CONSTANTS.ERRORS.UNKNOWN_ERROR;
     }
   };
 
@@ -69,8 +66,8 @@ const WeatherSearch = ({ loading }: WeatherSearchProps) => {
         if (data.length === 0 && searchTerm.length > 0) {
           const newMessage =
             searchTerm.length < WEATHER_API.API_QUERY_MIN
-              ? 'Keep typing...'
-              : 'No cities found';
+              ? UI_CONSTANTS.SEARCH_MESSAGES.TYPING
+              : UI_CONSTANTS.SEARCH_MESSAGES.NO_RESULTS;
           setMessage(newMessage);
           setLocations([]);
         } else if (data.length > 0) {
@@ -83,7 +80,7 @@ const WeatherSearch = ({ loading }: WeatherSearchProps) => {
           setErrorMessage(message);
         } else {
           // Handle unexpected errors (network issues, etc.)
-          setErrorMessage('An unexpected error occurred');
+          setErrorMessage(UI_CONSTANTS.ERRORS.NETWORK_ERROR);
         }
       } finally {
         setCitySearchLoading(false);
@@ -174,7 +171,7 @@ const WeatherSearch = ({ loading }: WeatherSearchProps) => {
           renderInput={(params) => (
             <TextField
               {...params}
-              label="Search for a city"
+              label={`${UI_CONSTANTS.FORM_TEXT.SEARCH_LABEL}`}
               variant="outlined"
               InputProps={{
                 ...params.InputProps,
@@ -192,7 +189,7 @@ const WeatherSearch = ({ loading }: WeatherSearchProps) => {
               inputProps={{
                 ...params.inputProps,
                 type: 'search',
-                placeholder: 'Search for a city...',
+                placeholder: UI_CONSTANTS.FORM_TEXT.SEARCH_PLACEHOLDER,
               }}
             />
           )}

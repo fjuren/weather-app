@@ -6,7 +6,7 @@ import {
 } from '../types/weather';
 import { weatherAPI } from '@/services/weatherAPI';
 import { WeatherAPIError } from '@/utils/helpers';
-import { WEATHER_API } from '@/utils/constants';
+import { UI_CONSTANTS, WEATHER_API } from '@/utils/constants';
 
 const appReducer = (
   state: WeatherState,
@@ -94,7 +94,7 @@ export const WeatherProvider: React.FC<{ children: ReactNode }> = ({
       } else {
         dispatch({
           type: 'GET_WEATHER_DATA_ERROR',
-          payload: 'An unexpected error occurred',
+          payload: UI_CONSTANTS.ERRORS.UNKNOWN_ERROR,
         });
       }
     }

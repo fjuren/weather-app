@@ -27,7 +27,6 @@ export const weatherAPI = {
       url.searchParams.set('limit', WEATHER_API.DEFAULT_LIMIT.toString());
       url.searchParams.set('appid', API_KEY);
 
-      console.log(url);
       const response = await fetch(url);
 
       if (!response.ok) {
